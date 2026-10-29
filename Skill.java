@@ -1,0 +1,3 @@
+package Core;
+
+    public enum Skill {HEALING, RESEARCH, REPAIR, EXPLORATION, RECONNAISSANCE, FIGHTFIRE};
