@@ -1,7 +1,10 @@
 package Core;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 abstract public class Facility implements Location{
@@ -51,6 +54,18 @@ abstract public class Facility implements Location{
         }
 
         return resource.remove(amount);
+    }
+
+    private final List<Equipment> equipment = new ArrayList<>();
+
+    public void addEquipment(Equipment item) {
+        if (item == null)
+            throw new IllegalArgumentException("Equipment cannot be null");
+        equipment.add(item);
+    }
+
+    public List<Equipment> getEquipment() {
+        return Collections.unmodifiableList(equipment);
     }
 
     public String getLocation() {
