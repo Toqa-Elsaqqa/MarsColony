@@ -25,4 +25,7 @@ abstract public class Human extends Agent{
     {
         return fatigue;
     }
+
+    @Override
+    public boolean isHuman() { return true; }
 }
