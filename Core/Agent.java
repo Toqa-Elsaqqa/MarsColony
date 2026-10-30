@@ -31,6 +31,9 @@ abstract public class Agent {
     }
 
     abstract protected boolean hasAbilityFor(Skill skill);
+
+    // Ask the agent whether it is a human crew member (no instanceof checks needed)
+    abstract public boolean isHuman();
     
     public final boolean canPerform(Skill skill)
     {
