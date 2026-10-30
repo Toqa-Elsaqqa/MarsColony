@@ -24,4 +24,7 @@ abstract public class Robot extends Agent {
     {
         return battery;
     }
+
+    @Override
+    public boolean isHuman() { return false; }
 }
