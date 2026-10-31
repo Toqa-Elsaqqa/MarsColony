@@ -1,0 +1,49 @@
+@startuml use_case_diagram
+title Use Case Diagram - MARS-OPS
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Colony Operator" as CO
+actor "Emergency Operator" as EO
+
+rectangle "MARS-OPS System" {
+    usecase "Manage crew members\nand robotic units" as UC1
+    usecase "Manage facilities\nand equipment" as UC2
+    usecase "Monitor resources" as UC3
+    usecase "Generate colony\nstatus report" as UC4
+    usecase "Submit mission" as UC5
+    usecase "Assign mission" as UC6
+    usecase "Execute mission" as UC7
+    usecase "Monitor missions" as UC8
+    usecase "Advance simulation time" as UC9
+    usecase "Monitor environmental\nconditions" as UC10
+    usecase "Trigger and handle\nemergencies" as UC11
+    usecase "Inspect mission and\nemergency outcomes" as UC12
+
+    usecase "Validate agents, resources\nand environment" as V1
+    usecase "Reject mission\n(state FAILED + reason)" as X1
+    usecase "Dispatch responders and\nconsume response resources" as I1
+    usecase "Mark emergency\nUNRESOLVED" as X2
+}
+
+CO --> UC1
+CO --> UC2
+CO --> UC3
+CO --> UC4
+CO --> UC5
+CO --> UC7
+CO --> UC8
+CO --> UC9
+CO --> UC10
+CO --> UC12
+EO --> UC11
+EO --> UC12
+
+UC5 ..> V1 : <<include>>
+UC5 ..> UC6 : <<include>>
+UC7 ..> UC9 : <<include>>
+UC4 ..> UC3 : <<include>>
+UC11 ..> I1 : <<include>>
+X1 ..> UC5 : <<extend>>\n[validation fails or another\nmission is active]
+X2 ..> UC11 : <<extend>>\n[responders or resources\nunavailable]
+@enduml
