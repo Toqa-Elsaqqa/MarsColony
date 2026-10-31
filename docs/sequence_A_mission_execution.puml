@@ -1,0 +1,47 @@
+@startuml
+actor Operator
+participant MarsColony
+participant Mission
+participant Agent
+participant Simulation
+
+Operator -> MarsColony : submitMission(mission)
+MarsColony -> MarsColony : check active mission
+alt Another mission is active
+    MarsColony -> Mission : fail("Another mission is currently active")
+    Mission -> Agent : release assigned agents
+else No active mission
+    MarsColony -> Mission : validateRequirements(colony, environment)
+    alt Requirements invalid
+        MarsColony -> Mission : fail(failureReason)
+        Mission -> Agent : release assigned agents
+    else Requirements valid
+        MarsColony -> Agent : check availability and capability
+        alt Agent unavailable or incapable
+            MarsColony -> Mission : fail("Agent lacks capability or is unavailable")
+            Mission -> Agent : release assigned agents
+        else Agents accepted
+            MarsColony -> MarsColony : check and consume colony resources
+            alt Resources insufficient
+                MarsColony -> Mission : fail("Insufficient colony-wide operational resources")
+                Mission -> Agent : release assigned agents
+            else Resources available
+                MarsColony -> Mission : markAssigned()
+                MarsColony -> MarsColony : set active mission
+                Operator -> Simulation : advanceTime(units)
+                loop each time unit
+                    Simulation -> Mission : start() if ASSIGNED
+                    Simulation -> Mission : step(colony, environment)
+                    alt Duration reached
+                        Mission -> Mission : complete(colony)
+                        Mission -> Agent : release assigned agents
+                    else Mid-mission failure guard triggered
+                        Mission -> Mission : fail(reason)
+                        Mission -> Agent : release assigned agents
+                    end
+                end
+            end
+        end
+    end
+end
+@enduml
