@@ -1,0 +1,9 @@
+@startuml
+[*] --> ASSIGNED : accepted
+[*] --> FAILED : rejected / invalid requirements
+ASSIGNED --> IN_PROGRESS : start
+IN_PROGRESS --> COMPLETED : duration reached
+IN_PROGRESS --> FAILED : hazard / depleted battery / equipment failure
+COMPLETED --> [*] : release agents
+FAILED --> [*] : record reason / release agents
+@enduml
