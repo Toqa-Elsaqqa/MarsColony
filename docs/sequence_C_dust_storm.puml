@@ -1,0 +1,18 @@
+@startuml
+actor Operator
+participant MarsColony
+participant Environment
+participant ExplorationMission
+
+Operator -> MarsColony : submitMission(exploration)
+MarsColony -> MarsColony : check no active mission
+MarsColony -> ExplorationMission : validateRequirements(colony, environment)
+ExplorationMission -> Environment : isDustStorm()
+Environment --> ExplorationMission : true (DUST_STORM)
+ExplorationMission -> ExplorationMission : set failureReason
+ExplorationMission --> MarsColony : false
+MarsColony -> ExplorationMission : fail(failureReason)
+note right of ExplorationMission : State becomes FAILED immediately.
+No agent is locked and the mission never becomes active.
+MarsColony --> Operator : submission rejected
+@enduml
