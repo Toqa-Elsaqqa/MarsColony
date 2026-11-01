@@ -8,15 +8,31 @@ public class Habitat extends Facility{
         super(capacity, operational, location);
         this.sys = new LifeSupportSystem();
     }
-    
+
     public boolean consumeOxygenForOneTimeUnit() {
-        return sys.consumeOxygen(this);
+        boolean consumed = sys.consumeOxygen(this);
+        if (amountOf("OXYGEN") == 0) setOperationalStatus(false);
+        return consumed;
+    }
+    
+    @Override
+    public void advanceOneTimeUnit() {
+        if (!getOperationalStatus()) return;
+        consumeOxygenForOneTimeUnit();
     }
 
-    public boolean applyLeakForOneTimeUnit() {
-        return sys.leakOxygen(this);
+<<<<<<< Updated upstream
+=======
+    /** Deducts up to {@code amount} oxygen and returns the amount actually lost. */
+    public int applyLeak(int amount) {
+        if (amount < 0) throw new IllegalArgumentException("Leak amount cannot be negative");
+        int lost = Math.min(amount, amountOf("OXYGEN"));
+        if (lost > 0) remove("OXYGEN", lost);
+        if (amountOf("OXYGEN") == 0) setOperationalStatus(false);
+        return lost;
     }
 
+>>>>>>> Stashed changes
     @Override
     public String getFacId()
     {

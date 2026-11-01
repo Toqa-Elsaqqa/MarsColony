@@ -25,6 +25,7 @@ public class MarsColony implements ColonyServices {
     private final List<Facility> facilities = new ArrayList<Facility>();
     private final List<Mission> missionHistory = new ArrayList<Mission>();
     private Mission activeMission;
+    private Mission submissionInProgress;
     private final Environment environment;
 
     public MarsColony() { this(null, null, null, null); }
@@ -46,7 +47,10 @@ public class MarsColony implements ColonyServices {
     public List<Mission> getMissionHistory() { return Collections.unmodifiableList(missionHistory); }
     public Mission getActiveMission() { return activeMission; }
     public Environment getEnvironment() { return environment; }
+<<<<<<< Updated upstream
     public void setActiveMission(Mission mission) { activeMission = mission; }
+=======
+>>>>>>> Stashed changes
     public void addCrew(Human human) { crew.add(human); }
     public void addRobot(Robot robot) { robots.add(robot); }
     public void addFacility(Facility facility) { facilities.add(facility); }
@@ -130,11 +134,34 @@ public class MarsColony implements ColonyServices {
 
     public boolean submitMission(Mission mission) {
         if (mission == null) throw new IllegalArgumentException("Mission cannot be null");
+<<<<<<< Updated upstream
+=======
+        if (mission.getState() != Missions.MissionState.PENDING) return false;
+>>>>>>> Stashed changes
         if (activeMission != null) {
             mission.fail("Another mission is currently active");
             missionHistory.add(mission);
             return false;
         }
+<<<<<<< Updated upstream
+=======
+        for (Agent agent : mission.getAssignedAgents()) {
+            if (agent == null || !allAgents().contains(agent) || !agent.getAvailability()) {
+                mission.fail("Assigned agent is not available in this colony");
+                missionHistory.add(mission);
+                return false;
+            }
+        }
+        if (environment.isCommDisruption()) {
+            for (Agent agent : mission.getAssignedAgents()) {
+                if (agent.requiresRemoteControl()) {
+                    mission.fail("Communication disruption prevents remote drone operations");
+                    missionHistory.add(mission);
+                    return false;
+                }
+            }
+        }
+>>>>>>> Stashed changes
         if (!mission.validateRequirements(this, environment)) {
             mission.fail(mission.getFailureReason());
             missionHistory.add(mission);
@@ -152,39 +179,26 @@ public class MarsColony implements ColonyServices {
             missionHistory.add(mission);
             return false;
         }
-        mission.markAssigned();
+        submissionInProgress = mission;
+        try {
+            mission.markAssigned(this);
+        } finally {
+            submissionInProgress = null;
+        }
         activeMission = mission;
         missionHistory.add(mission);
         return true;
     }
 
+    public void clearActiveMission(Mission mission) {
+        if (activeMission == mission && (mission.getState() == Missions.MissionState.COMPLETED
+                || mission.getState() == Missions.MissionState.FAILED)) activeMission = null;
+    }
+
+    public boolean isAcceptingMission(Mission mission) { return submissionInProgress == mission; }
+
     public String generateStatusReport() {
-        StringBuilder report = new StringBuilder("Mars Colony Status\nEnvironment: ")
-                .append(environment.getWeatherCondition()).append("\nFacilities:");
-        for (Facility facility : facilities)
-            report.append("\n- ").append(facility.getClass().getSimpleName()).append(": ")
-                    .append(facility.getOperationalStatus() ? "operational" : "non-operational");
-        report.append("\nResources:");
-        Map<String, Integer> totals = new LinkedHashMap<String, Integer>();
-        for (Mission mission : missionHistory)
-            for (String resource : mission.getRequiredResources().keySet())
-                totals.put(resource, getTotalResource(resource));
-        if (totals.isEmpty()) report.append(" none");
-        for (Map.Entry<String, Integer> entry : totals.entrySet())
-            report.append(' ').append(entry.getKey()).append('=').append(entry.getValue());
-        report.append("\nCrew:");
-        for (Human human : crew) report.append(' ').append(human.getClass().getSimpleName())
-                .append('(').append(human.getAvailability() ? "available" : "assigned").append(')');
-        report.append("\nRobots:");
-        for (Robot robot : robots) report.append(' ').append(robot.getClass().getSimpleName())
-                .append('(').append(robot.getAvailability() ? "available" : "assigned").append(')');
-        report.append("\nActive mission: ").append(activeMission == null ? "none"
-                : activeMission.getName() + " [" + activeMission.getState() + "]");
-        report.append("\nMission history:");
-        for (Mission mission : missionHistory) report.append("\n- ").append(mission.getName()).append(": ")
-                .append(mission.getState()).append(mission.getFailureReason() == null
-                        ? "" : " (" + mission.getFailureReason() + ")");
-        return report.toString();
+        return new Reporting.StatusReport().generate(this);
     }
 
 }

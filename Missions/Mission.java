@@ -1,14 +1,23 @@
 package Missions;
 
 import Core.Agent;
+<<<<<<< Updated upstream
+=======
+import Core.Equipment;
+import Core.EquipmentType;
+>>>>>>> Stashed changes
 import Core.Location;
+import Core.MartianSurface;
 import Core.Skill;
 import java.lang.reflect.Method;
 import Environment.Environment;
 import Colony.MarsColony;
 import Core.Facility;
+<<<<<<< Updated upstream
 import Personnel.Human;
 import Robots.Robot;
+=======
+>>>>>>> Stashed changes
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +30,17 @@ public abstract class Mission {
     private final String name;
     private final int duration;
     private int timeElapsed;
-    private MissionState state = MissionState.ASSIGNED;
+    private MissionState state = MissionState.PENDING;
     private String failureReason;
     private final List<Agent> assignedAgents;
     private final Map<String, Integer> requiredResources;
     private Facility targetFacility;
     private Location targetLocation;
+<<<<<<< Updated upstream
+=======
+    private boolean agentsMarkedUnavailable;
+    private final List<Equipment> equipment = new ArrayList<Equipment>();
+>>>>>>> Stashed changes
 
     protected Mission(String id, String name, int duration, List<Agent> assignedAgents,
                       Map<String, Integer> requiredResources) {
@@ -61,32 +75,65 @@ public abstract class Mission {
     public void setTargetFacility(Facility targetFacility) { this.targetFacility = targetFacility; }
     public Location getTargetLocation() { return targetLocation; }
     public void setTargetLocation(Location targetLocation) { this.targetLocation = targetLocation; }
+    public void addEquipment(Equipment item) {
+        if (item == null) throw new IllegalArgumentException("Equipment cannot be null");
+        equipment.add(item);
+    }
+    public List<Equipment> getEquipment() { return Collections.unmodifiableList(equipment); }
     protected void setFailureReason(String reason) { this.failureReason = reason; }
 
     public boolean agentsCapable() {
         return true;
     }
 
-    public void markAssigned() {
-        if (state != MissionState.ASSIGNED) return;
+    public final void markAssigned(Colony.MarsColony colony) {
+        if (colony == null || colony.getActiveMission() != null || !colony.isAcceptingMission(this))
+            throw new IllegalStateException("Mission acceptance requires an idle colony");
+        if (state != MissionState.PENDING) throw new IllegalStateException("Mission is not pending");
+        state = MissionState.ASSIGNED;
         for (Agent agent : assignedAgents) agent.setAvailability(false);
     }
 
-    public void start() {
-        if (state == MissionState.ASSIGNED) state = MissionState.IN_PROGRESS;
+    private void start() {
+        if (state != MissionState.ASSIGNED) return;
+        state = MissionState.IN_PROGRESS;
+        Location destination = getMissionLocation();
+        if (destination != null)
+            for (Agent agent : assignedAgents) agent.setLocation(destination);
     }
 
-    public void step(MarsColony colony, Environment env) {
+    /** Advances the mission through its controlled simulation entry point. */
+    public final void advanceOneTimeUnit(MarsColony colony, Environment env) {
+        if (state == MissionState.ASSIGNED) start();
+        step(colony, env);
+    }
+
+    private void step(MarsColony colony, Environment env) {
         if (state != MissionState.IN_PROGRESS) return;
+<<<<<<< Updated upstream
+=======
+        if (env.isCommDisruption() && requiresRemoteControl()) {
+            fail("Communication disruption interrupted remote drone mission");
+            return;
+        }
+        if (env.isDustStorm() && hasSurfaceRover()) {
+            fail("Dust storm interrupted surface rover mission");
+            return;
+        }
+>>>>>>> Stashed changes
         String hazard = environmentalFailure(env);
         if (hazard != null) { fail(hazard); return; }
         if (agentsDepleted()) { fail("Assigned agent battery depleted"); return; }
         if (equipmentFailed()) { fail("Mission equipment failure"); return; }
         timeElapsed++;
+<<<<<<< Updated upstream
         for (Agent agent : assignedAgents) {
             changeNumeric(agent, "getBattery", "setBattery", -1);
             changeNumeric(agent, "getFatigue", "setFatigue", 1);
         }
+=======
+        for (Agent agent : assignedAgents) agent.onMissionTick();
+>>>>>>> Stashed changes
         if (timeElapsed >= duration) complete(colony);
     }
 
@@ -94,8 +141,8 @@ public abstract class Mission {
     protected boolean hasEquipmentFailure() { return false; }
     protected void applyCompletion(MarsColony colony) { }
 
-    public void complete(MarsColony colony) {
-        if (state != MissionState.IN_PROGRESS && state != MissionState.ASSIGNED) return;
+    private void complete(MarsColony colony) {
+        if (state != MissionState.IN_PROGRESS) return;
         applyCompletion(colony);
         state = MissionState.COMPLETED;
         releaseAgents();
@@ -113,50 +160,46 @@ public abstract class Mission {
     }
 
     private boolean agentsDepleted() {
+<<<<<<< Updated upstream
         for (Agent agent : assignedAgents) {
             Integer battery = number(agent, "getBattery");
             if (battery != null && battery <= 0) return true;
         }
+=======
+        for (Agent agent : assignedAgents) if (!agent.canContinueMission()) return true;
+>>>>>>> Stashed changes
         return false;
     }
 
     private boolean equipmentFailed() {
         if (hasEquipmentFailure()) return true;
-        for (Agent agent : assignedAgents) {
-            if (Boolean.FALSE.equals(bool(agent, "isOperational"))) return true;
-            for (String getter : new String[] {"getEquipment", "getAssignedEquipment"}) {
-                Object equipment = invoke(agent, getter);
-                if (equipment instanceof Iterable<?>) {
-                    for (Object item : (Iterable<?>) equipment) {
-                        if (Boolean.FALSE.equals(bool(item, "isOperational"))) return true;
-                    }
-                }
-            }
-        }
+        for (Equipment item : equipment) if (item.isBroken()) return true;
+        for (Agent agent : assignedAgents)
+            for (Equipment item : agent.getEquipment()) if (item.isBroken()) return true;
         return false;
     }
 
-    protected boolean hasAgent(Class<?> type) {
-        for (Agent agent : assignedAgents) if (type.isInstance(agent)) return true;
+    protected final void requireResource(String type, int amount) {
+        Integer current = requiredResources.get(type);
+        if (current == null || current < amount) requiredResources.put(type, amount);
+    }
+
+    protected boolean hasAgentWithSkill(Skill skill) {
+        for (Agent agent : assignedAgents) if (agent.canPerform(skill)) return true;
         return false;
     }
 
-    protected boolean hasNamedAgent(String simpleName) {
-        for (Agent agent : assignedAgents) if (agent.getClass().getSimpleName().equals(simpleName)) return true;
+    protected boolean hasHumanWithSkill(Skill skill) {
+        for (Agent agent : assignedAgents) if (agent.isHuman() && agent.canPerform(skill)) return true;
         return false;
     }
 
-    protected boolean agentHasSkill(String simpleName, String skillName) {
-        for (Agent agent : assignedAgents) {
-            if (!agent.getClass().getSimpleName().equals(simpleName)) continue;
-            try {
-            Skill skill = Skill.valueOf(skillName);
-            if (agent.canPerform(skill)) return true;
-            } catch (Exception ignored) { }
-        }
+    protected boolean hasRobotWithSkill(Skill skill) {
+        for (Agent agent : assignedAgents) if (!agent.isHuman() && agent.canPerform(skill)) return true;
         return false;
     }
 
+<<<<<<< Updated upstream
     protected static Object invoke(Object target, String method) {
         if (target == null) return null;
         try { return target.getClass().getMethod(method).invoke(target); }
@@ -178,5 +221,29 @@ public abstract class Mission {
         if (current == null) return;
         try { target.getClass().getMethod(setter, int.class).invoke(target, Math.max(0, current + delta)); }
         catch (Exception ignored) { }
+=======
+    protected boolean hasSurfaceRover() {
+        for (Agent agent : assignedAgents) if (agent.isSurfaceRover()) return true;
+        return false;
+    }
+
+    protected boolean requiresRemoteControl() {
+        for (Agent agent : assignedAgents) if (agent.requiresRemoteControl()) return true;
+        return false;
+    }
+
+    protected boolean hasOperationalRequiredEquipment() {
+        for (Equipment item : equipment) if (!item.isBroken()
+                && (item.getType() == EquipmentType.EXPLORATION || item.getType() == EquipmentType.SCIENTIFIC_INSTRUMENT)) return true;
+        for (Agent agent : assignedAgents)
+            if (agent.hasOperationalEquipment(EquipmentType.EXPLORATION, EquipmentType.SCIENTIFIC_INSTRUMENT)) return true;
+        return false;
+    }
+
+    protected Location getMissionLocation() {
+        if (targetLocation != null) return targetLocation;
+        if (targetFacility != null) return targetFacility;
+        return hasSurfaceRover() ? MartianSurface.INSTANCE : null;
+>>>>>>> Stashed changes
     }
 }

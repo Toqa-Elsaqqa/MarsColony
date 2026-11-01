@@ -1,7 +1,8 @@
 @startuml
-[*] --> ASSIGNED : accepted
-[*] --> FAILED : rejected / invalid requirements
-ASSIGNED --> IN_PROGRESS : start
+[*] --> PENDING : created
+PENDING --> ASSIGNED : MarsColony accepts and reserves agents/resources
+PENDING --> FAILED : rejected / invalid requirements
+ASSIGNED --> IN_PROGRESS : Simulation starts mission and moves assigned agents
 IN_PROGRESS --> COMPLETED : duration reached
 IN_PROGRESS --> FAILED : hazard / depleted battery / equipment failure
 COMPLETED --> [*] : release agents

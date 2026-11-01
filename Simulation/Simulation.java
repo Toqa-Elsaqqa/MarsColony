@@ -30,12 +30,12 @@ public class Simulation {
         if (timeUnits < 0) throw new IllegalArgumentException("Time units cannot be negative");
         for (int i = 0; i < timeUnits; i++) {
             currentTime++;
+            for (Core.Facility facility : colony.getFacilities()) facility.advanceOneTimeUnit();
             Mission mission = colony.getActiveMission();
             if (mission == null) continue;
-            if (mission.getState() == MissionState.ASSIGNED) mission.start();
-            mission.step(colony, environment);
+            mission.advanceOneTimeUnit(colony, environment);
             if (mission.getState() == MissionState.COMPLETED || mission.getState() == MissionState.FAILED)
-                colony.setActiveMission(null);
+                colony.clearActiveMission(mission);
         }
     }
 }

@@ -39,8 +39,11 @@ public class Fire extends Emergency {
         lab.setOperationalStatus(false);
 
         // Oxygen consumption increases: burn extra oxygen, never below zero
-        int burn = Math.min(EXTRA_OXYGEN_BURN, lab.amountOf("OXYGEN"));
-        lab.remove("OXYGEN", burn);
+        int localBurn = Math.min(EXTRA_OXYGEN_BURN, lab.amountOf("OXYGEN"));
+        if (localBurn > 0) lab.remove("OXYGEN", localBurn);
+        int remainingBurn = EXTRA_OXYGEN_BURN - localBurn;
+        int colonyBurn = Math.min(remainingBurn, colony.getTotalResource("OXYGEN"));
+        if (colonyBurn > 0) colony.consume(Collections.singletonMap("OXYGEN", colonyBurn));
 
         // People inside are injured (responders are not here yet: detection comes first)
         for (Agent a : colony.agentsAt(lab)) {

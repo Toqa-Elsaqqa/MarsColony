@@ -49,7 +49,11 @@ public class OxygenLeak extends Emergency {
     @Override
     protected void applyUnresolvedEffects(ColonyServices colony) {
         totalOxygenLost += habitat.applyLeak(OXYGEN_LOSS);
+        habitat.setOperationalStatus(false);
     }
+
+    @Override
+    protected void applyResolutionEffects(ColonyServices colony) { habitat.setOperationalStatus(true); }
 
     public Habitat getHabitat() { return habitat; }
     public int getTotalOxygenLost() { return totalOxygenLost; }

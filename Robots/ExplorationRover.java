@@ -20,8 +20,21 @@ public class ExplorationRover extends Robot{
     equipment.add(item);
     }
 
+    @Override
     public List<Equipment> getEquipment() {
         return Collections.unmodifiableList(equipment);
+    }
+    @Override
+    public boolean isSurfaceRover() { return true; }
+
+    @Override
+    public boolean hasOperationalEquipment(Core.EquipmentType... types) {
+        for (Equipment item : equipment) {
+            if (!item.isOperational()) continue;
+            for (Core.EquipmentType type : types)
+                if (item.getType() == type) return true;
+        }
+        return false;
     }
     @Override
     public boolean hasAbilityFor(Skill skill) {

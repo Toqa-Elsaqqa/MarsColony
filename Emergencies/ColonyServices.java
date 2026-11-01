@@ -11,5 +11,13 @@ public interface ColonyServices {
     List<Agent> findAvailableAgents(Skill skill);
     List<Agent> agentsAt(Location location);
     boolean consume(Map<String, Integer> required);
+<<<<<<< Updated upstream
+=======
+
+    int getTotalResource(String type);
+
+    // If the active mission involves this agent, it becomes FAILED with the given
+    // reason and all its agents are released (does nothing if there is no such mission)
+>>>>>>> Stashed changes
     void failActiveMissionInvolving(Agent agent, String reason);
 }

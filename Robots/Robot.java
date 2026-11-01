@@ -27,4 +27,10 @@ abstract public class Robot extends Agent {
 
     @Override
     public boolean isHuman() { return false; }
+
+    @Override
+    public void onMissionTick() { setBattery(Math.max(0, battery - 1)); }
+
+    @Override
+    public boolean canContinueMission() { return battery > 0; }
 }

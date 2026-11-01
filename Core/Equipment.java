@@ -26,6 +26,8 @@ public class Equipment {
         return damaged;
     }
 
+    public boolean isBroken() { return !operational; }
+
     public boolean isOperational() {
         return operational;
     }

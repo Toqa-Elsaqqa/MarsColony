@@ -12,5 +12,8 @@ public class CommunicationStation extends Facility{
     public String getFacId() {
         return "COMMSTATION-" + facId;
     }
+
+    @Override
+    public boolean isCommunicationStation() { return true; }
     
 }

@@ -1,5 +1,8 @@
 package Core;
 
+import java.util.Collections;
+import java.util.List;
+
 abstract public class Agent {
     private String name;
     private static int idCounter = 0;
@@ -34,6 +37,18 @@ abstract public class Agent {
 
     // Ask the agent whether it is a human crew member (no instanceof checks needed)
     abstract public boolean isHuman();
+
+    public void onMissionTick() { }
+
+    public boolean canContinueMission() { return true; }
+
+    public boolean requiresRemoteControl() { return false; }
+
+    public boolean isSurfaceRover() { return false; }
+
+    public boolean hasOperationalEquipment(EquipmentType... types) { return false; }
+
+    public List<Equipment> getEquipment() { return Collections.emptyList(); }
     
     public final boolean canPerform(Skill skill)
     {

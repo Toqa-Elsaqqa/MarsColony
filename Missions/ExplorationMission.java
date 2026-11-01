@@ -4,8 +4,8 @@ import Core.Agent;
 import Environment.Environment;
 import Environment.WeatherCondition;
 import Colony.MarsColony;
-import Robots.ExplorationRover;
-import Personnel.Scientist;
+import Core.EquipmentType;
+import Core.Skill;
 import java.util.List;
 import java.util.Map;
 
@@ -20,21 +20,13 @@ public class ExplorationMission extends Mission {
 
     @Override public boolean validateRequirements(MarsColony colony, Environment env) {
         if (env.isDustStorm()) return reject("Dust storm prevents exploration");
-        if (!hasAgent(ExplorationRover.class) || !agentHasSkill("ExplorationRover", "EXPLORATION"))
+        if (!hasSurfaceRover() || !hasAgentWithSkill(Skill.EXPLORATION))
             return reject("Exploration rover with exploration skill required");
-        if (!hasAgent(Scientist.class) || !agentHasSkill("Scientist", "RESEARCH"))
-            return reject("Scientist with exploration or science skill required");
-        for (Agent agent : getAssignedAgents()) {
-            if (agent instanceof ExplorationRover) {
-                Integer battery = number(agent, "getBattery");
-                if (battery != null && battery < getDuration()) return reject("Insufficient rover battery");
-            }
-        }
+        if (!hasAgentWithSkill(Skill.RESEARCH)) return reject("Scientist with research skill required");
+        if (!hasOperationalRequiredEquipment()) return reject("Operational exploration or scientific equipment required");
+        for (Agent agent : getAssignedAgents())
+            if (agent.isSurfaceRover() && !agent.canContinueMission()) return reject("Rover battery depleted");
         return true;
-    }
-
-    @Override protected String environmentalFailure(Environment env) {
-        return env.getWeatherCondition() == WeatherCondition.DUST_STORM ? "Dust storm interrupted exploration" : null;
     }
 
     private boolean reject(String reason) { setFailureReason(reason); return false; }

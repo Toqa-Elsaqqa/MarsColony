@@ -12,5 +12,8 @@ public class Drone extends Robot{
     public boolean hasAbilityFor(Skill skill) {
         return skill == Skill.RECONNAISSANCE;
     }
+
+    @Override
+    public boolean requiresRemoteControl() { return true; }
     
 }

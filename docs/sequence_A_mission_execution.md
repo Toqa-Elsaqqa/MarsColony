@@ -28,12 +28,14 @@ sequenceDiagram
                     Colony->>Mission: fail(resource reason)
                     Mission->>Agent: Release assigned agents
                 else Resources available
-                    Colony->>Mission: markAssigned()
+                    Colony->>Mission: markAssigned(colony)
                     Colony->>Colony: Set active mission
                     Operator->>Simulation: advanceTime(units)
                     loop Each time unit
-                        Simulation->>Mission: start() if ASSIGNED
-                        Simulation->>Mission: step(colony, environment)
+                        Simulation->>Facility: advanceOneTimeUnit()
+                        Simulation->>Mission: advanceOneTimeUnit(colony, environment)
+                        Mission->>Agent: setLocation(target) on first tick
+                        Mission->>Agent: onMissionTick()
                         alt Mission completes
                             Mission->>Agent: Release assigned agents
                         else A failure guard triggers

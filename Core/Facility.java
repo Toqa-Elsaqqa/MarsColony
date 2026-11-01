@@ -27,6 +27,18 @@ abstract public class Facility implements Location{
         facId = facCounter;
     }
     abstract public String getFacId();
+
+    public boolean supportsResearch() { return false; }
+
+    public boolean isCommunicationStation() { return false; }
+
+    public void advanceOneTimeUnit() { }
+
+    public boolean hasOperationalEquipment(EquipmentType type) {
+        for (Equipment item : equipment)
+            if (item.isOperational() && item.getType() == type) return true;
+        return false;
+    }
     
    
     private final Map<String, Resource> ledger = new HashMap<>();
@@ -37,14 +49,17 @@ abstract public class Facility implements Location{
     }
 
     public final void add(Resource resource) {
+        if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
         Resource existing = ledger.get(resource.getType());
 
         if (existing == null) {
-            ledger.put(resource.getType(), resource);
+            ledger.put(resource.getType(), new Resource(resource.getType(), resource.getQuantity()));
         } else {
             existing.add(resource.getQuantity());
         }
     }
+
+    public final void addResource(Resource resource) { add(resource); }
 
     public final boolean remove(String type, int amount) {
         Resource resource = ledger.get(type);
@@ -66,6 +81,10 @@ abstract public class Facility implements Location{
 
     public List<Equipment> getEquipment() {
         return Collections.unmodifiableList(equipment);
+    }
+
+    public void repairEquipment() {
+        for (Equipment item : equipment) if (item.isBroken()) item.repair();
     }
 
     public String getLocation() {

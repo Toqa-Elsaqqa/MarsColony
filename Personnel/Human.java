@@ -28,4 +28,7 @@ abstract public class Human extends Agent{
 
     @Override
     public boolean isHuman() { return true; }
+
+    @Override
+    public void onMissionTick() { setFatigue(Math.min(100, fatigue + 1)); }
 }

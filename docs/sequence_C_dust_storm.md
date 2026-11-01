@@ -17,3 +17,5 @@ sequenceDiagram
     Note over Mission,Colony: Mission becomes FAILED immediately, is never active, and agents are not locked.
     Colony-->>Operator: Submission rejected
 ```
+
+When a dust storm begins during an active mission, the next simulation tick also fails any mission using a surface rover, including a rover based rescue mission.

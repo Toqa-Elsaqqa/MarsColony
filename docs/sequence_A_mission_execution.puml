@@ -26,12 +26,14 @@ else No active mission
                 MarsColony -> Mission : fail("Insufficient colony-wide operational resources")
                 Mission -> Agent : release assigned agents
             else Resources available
-                MarsColony -> Mission : markAssigned()
+                MarsColony -> Mission : markAssigned(colony)
                 MarsColony -> MarsColony : set active mission
                 Operator -> Simulation : advanceTime(units)
                 loop each time unit
-                    Simulation -> Mission : start() if ASSIGNED
-                    Simulation -> Mission : step(colony, environment)
+                    Simulation -> MarsColony : advance each facility one time unit
+                    Simulation -> Mission : advanceOneTimeUnit(colony, environment)
+                    Mission -> Agent : setLocation(target) on first tick
+                    Mission -> Agent : onMissionTick()
                     alt Duration reached
                         Mission -> Mission : complete(colony)
                         Mission -> Agent : release assigned agents
