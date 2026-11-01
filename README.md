@@ -1,5 +1,9 @@
 # MARS-OPS
 
+Autonomous Mars Colony Management & Emergency Simulator — Computer and Communications Programming II, Lab 5.
+
+MARS-OPS models a Mars research colony with crew, robots, facilities, shared resources, missions, environmental conditions and emergencies. `Main` demonstrates five required scenarios and optional emergency examples.
+
 ## Packages
 
 | Package | Main types and responsibility |
@@ -11,9 +15,17 @@
 | `Colony` | `MarsColony` manages agents, facilities, resources and the one active mission |
 | `Missions` | `Mission` and the exploration, repair, research and rescue mission types |
 | `Environment` | `Environment` and `WeatherCondition` |
-| `Simulation` | `Simulation.advanceTime(int)` advances missions, agent condition and habitat oxygen use |
+| `Simulation` | `Simulation.advanceTime(int)` advances missions, agent condition and operational habitat oxygen use |
 | `Emergencies` | `Emergency`, emergency types, `EmergencyHandler` and `ColonyServices` |
 | `Reporting` | `StatusReport` renders colony and event history |
+
+## Object-oriented relationships
+
+- **Inheritance:** `Human` and `Robot` extend `Agent`; concrete crew and robot classes extend those bases. Facilities, missions and emergencies also have abstract base classes and concrete subclasses.
+- **Association:** missions use assigned `Agent` instances; emergency types refer to affected facilities or agents.
+- **Aggregation:** `MarsColony` holds crew, robots and facilities that are constructed independently and added to it.
+- **Composition:** each `Habitat` constructs and owns its `LifeSupportSystem`.
+- **Interface:** `MarsColony` implements `ColonyServices`, which decouples `EmergencyHandler` from the concrete colony.
 
 ## Resource allocation policy
 
@@ -31,11 +43,9 @@ Missions validate their required skills, equipment, facilities and resources bef
 
 ## Environmental effects on missions
 
-`DUST_STORM` prevents exploration missions from starting and fails active missions using a surface rover on their next simulation step. `COMMUNICATION_DISRUPTION` blocks remote drone missions and rescue coordination, and fails active communication-dependent missions. Other mission types continue under these conditions unless their own requirements fail.
-
-## UML documentation
-
-`docs/` contains editable PlantUML `.puml` and Mermaid `.md` sources for the merged class diagram, object snapshot, mission state machine, sequence diagrams A (mission execution), B (oxygen leak), C (dust storm), and the use case diagram. The class diagram shows inheritance, association, aggregation and `Habitat` composition of `LifeSupportSystem`. The use case diagram covers colony-operator and emergency-operator use cases with `<<include>>` and `<<extend>>` relations.
+- `DUST_STORM` prevents exploration missions from starting and fails active missions using a surface rover on their next simulation step.
+- `COMMUNICATION_DISRUPTION` blocks remote drone missions and rescue coordination, and fails active communication-dependent missions.
+- Other mission types continue under these conditions unless their own requirements fail.
 
 ## Build and run
 
@@ -57,3 +67,7 @@ Run one required scenario with `java -cp out Main 1` through `java -cp out Main 
 3. **Resource shortage:** a 600 oxygen request is rejected without consumption; a 450 request is sourced from two operational facilities.
 4. **Emergency handling:** resolves an oxygen leak, then demonstrates unresolved leaks and their second oxygen deduction.
 5. **Environmental effect:** a dust storm rejects exploration at submission and interrupts an active rover mission.
+
+## UML documentation
+
+`docs/` contains editable PlantUML `.puml` and Mermaid `.md` sources for the merged class diagram, object snapshot, mission state machine, sequence diagrams A (mission execution), B (oxygen leak), C (dust storm), and the use case diagram. The class diagram shows inheritance, association, aggregation and `Habitat` composition of `LifeSupportSystem`. The use case diagram covers colony-operator and emergency-operator use cases with `<<include>>` and `<<extend>>` relations.

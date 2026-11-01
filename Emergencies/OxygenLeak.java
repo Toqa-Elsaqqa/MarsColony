@@ -4,6 +4,8 @@ import Core.Skill;
 import Facilities.Habitat;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 public class OxygenLeak extends Emergency {
 
@@ -28,15 +30,17 @@ public class OxygenLeak extends Emergency {
 
     // Oxygen leak needs one human and one robot, both able to repair
     @Override
-    public List<Skill> requiredHumanSkills() { return List.of(Skill.REPAIR); }
+    public List<Skill> requiredHumanSkills() { return Collections.singletonList(Skill.REPAIR); }
 
     @Override
-    public List<Skill> requiredRobotSkills() { return List.of(Skill.REPAIR); }
+    public List<Skill> requiredRobotSkills() { return Collections.singletonList(Skill.REPAIR); }
 
     @Override
     public Map<String, Integer> responseCost() {
-        return Map.of("SPARE_PARTS", SPARE_PARTS_COST,
-                      "BATTERY_POWER", BATTERY_COST);
+        Map<String, Integer> cost = new HashMap<String, Integer>();
+        cost.put("SPARE_PARTS", SPARE_PARTS_COST);
+        cost.put("BATTERY_POWER", BATTERY_COST);
+        return cost;
     }
 
     // Called by Emergency.detect(): deduct the initial loss (once per emergency)

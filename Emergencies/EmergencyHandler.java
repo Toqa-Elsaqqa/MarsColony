@@ -3,15 +3,20 @@ package Emergencies;
 import Core.Agent;
 import Core.Skill;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class EmergencyHandler {
     private final ColonyServices colony;
+    private final List<Emergency> history = new ArrayList<>();   // every handled emergency, in order
 
     public EmergencyHandler(ColonyServices colony) { this.colony = colony; }
 
+    public List<Emergency> getHistory() { return Collections.unmodifiableList(history); }
+
     public void handle(Emergency e) {
         process(e);
+        history.add(e);
         // Run emergencies triggered by this one (e.g. injuries after a fire)
         for (Emergency follow : e.followUps())
             handle(follow);

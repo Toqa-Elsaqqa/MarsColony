@@ -8,6 +8,8 @@ import Facilities.Lab;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Arrays;
 
 public class Fire extends Emergency {
     public static final int EXTRA_OXYGEN_BURN = 20;   // oxygen burned in the lab
@@ -25,12 +27,12 @@ public class Fire extends Emergency {
     }
 
     // One firefighter, no robot required
-    @Override public List<Skill> requiredHumanSkills() { return List.of(Skill.FIGHTFIRE); }
-    @Override public List<Skill> requiredRobotSkills() { return List.of(); }
+    @Override public List<Skill> requiredHumanSkills() { return Collections.singletonList(Skill.FIGHTFIRE); }
+    @Override public List<Skill> requiredRobotSkills() { return Collections.emptyList(); }
 
     @Override
     public Map<String, Integer> responseCost() {
-        return Map.of("WATER", WATER_COST);
+        return Collections.singletonMap("WATER", WATER_COST);
     }
 
     @Override

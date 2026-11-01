@@ -1,0 +1,64 @@
+@startuml sequence_B_oxygen_leak
+title Sequence Diagram B - Oxygen Leak Emergency
+skinparam sequenceMessageAlign center
+
+actor "Emergency Operator" as Op
+participant "handler:EmergencyHandler" as H
+participant "leak:OxygenLeak" as L
+participant "hab:Habitat" as Hab
+participant "colony:MarsColony" as C
+participant "engineer:Engineer" as Eng
+participant "robot:RepairRobot" as Rob
+
+Op -> H : handle(leak)
+note right of H : 1. Trigger emergency (manual)
+H -> L : detect(colony)
+L -> L : applyDetectionEffects(colony)
+L -> Hab : applyLeak(50)
+note right of Hab : 2-3. Affected habitat identified (leak location)\nInitial oxygen loss deducted, never below 0
+Hab --> L : lost
+H -> L : preconditionFailure()
+L --> H : null
+
+== Identify responders and check availability ==
+H -> L : requiredHumanSkills()
+L --> H : [REPAIR]
+H -> C : findAvailableAgents(REPAIR)
+C -> Eng : canPerform(REPAIR)
+C -> Rob : canPerform(REPAIR)
+C --> H : available agents
+H -> L : requiredRobotSkills()
+L --> H : [REPAIR]
+
+alt Human or robotic responder NOT available
+    H -> L : fail("No available ... responder", colony)
+    L -> L : applyUnresolvedEffects(colony)
+    L -> Hab : applyLeak(50)
+    note right of Hab : Additional loss: unresolved leak = 2 x 50\nNo response resources consumed
+    L --> H : state = UNRESOLVED (reason recorded)
+else Responders found
+    H -> L : responseCost()
+    L --> H : {SPARE_PARTS:2, BATTERY_POWER:5}
+    H -> C : consume(cost)
+    note right of C : 5. Check response resources\nall-or-nothing over operational facilities
+    alt Insufficient resources
+        C --> H : false
+        H -> L : fail("Insufficient resources", colony)
+        L -> Hab : applyLeak(50)
+        L --> H : state = UNRESOLVED (nobody dispatched)
+    else Resources consumed
+        C --> H : true
+        == Dispatch and repair ==
+        H -> Eng : setLocation(hab)
+        H -> Eng : setAvailability(false)
+        H -> Rob : setLocation(hab)
+        H -> Rob : setAvailability(false)
+        H -> L : resolve(colony)
+        L --> H : state = RESOLVED (total loss = 50)
+        == Release responders ==
+        H -> Eng : setAvailability(true)
+        H -> Rob : setAvailability(true)
+    end
+end
+H --> Op : emergency closed (recorded in history)
+@enduml
