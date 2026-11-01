@@ -9,6 +9,7 @@ import Environment.Environment;
 import Facilities.StorageFacility;
 import Missions.Mission;
 import Robots.Robot;
+import Robots.Drone;
 import Personnel.Human;
 
 import java.util.ArrayList;
@@ -46,7 +47,11 @@ public class MarsColony implements ColonyServices {
     public List<Mission> getMissionHistory() { return Collections.unmodifiableList(missionHistory); }
     public Mission getActiveMission() { return activeMission; }
     public Environment getEnvironment() { return environment; }
-    public void setActiveMission(Mission mission) { activeMission = mission; }
+    public void setActiveMission(Mission mission) {
+        if (mission != null && activeMission != null && activeMission != mission)
+            throw new IllegalStateException("Another mission is already active");
+        activeMission = mission;
+    }
     public void addCrew(Human human) { crew.add(human); }
     public void addRobot(Robot robot) { robots.add(robot); }
     public void addFacility(Facility facility) { facilities.add(facility); }
@@ -130,22 +135,32 @@ public class MarsColony implements ColonyServices {
 
     public boolean submitMission(Mission mission) {
         if (mission == null) throw new IllegalArgumentException("Mission cannot be null");
+        if (mission.getState() != Missions.MissionState.ASSIGNED) return false;
         if (activeMission != null) {
             mission.fail("Another mission is currently active");
             missionHistory.add(mission);
             return false;
         }
+        for (Agent agent : mission.getAssignedAgents()) {
+            if (agent == null || !allAgents().contains(agent) || !agent.getAvailability()) {
+                mission.fail("Assigned agent is not available in this colony");
+                missionHistory.add(mission);
+                return false;
+            }
+        }
+        if (environment.isCommDisruption()) {
+            for (Agent agent : mission.getAssignedAgents()) {
+                if (agent instanceof Drone) {
+                    mission.fail("Communication disruption prevents remote drone operations");
+                    missionHistory.add(mission);
+                    return false;
+                }
+            }
+        }
         if (!mission.validateRequirements(this, environment)) {
             mission.fail(mission.getFailureReason());
             missionHistory.add(mission);
             return false;
-        }
-        for (Agent agent : mission.getAssignedAgents()) {
-            if (!agent.getAvailability() || !mission.agentsCapable()) {
-                mission.fail("Agent lacks capability or is unavailable");
-                missionHistory.add(mission);
-                return false;
-            }
         }
         if (!consume(mission.getRequiredResources())) {
             mission.fail("Insufficient colony-wide operational resources");

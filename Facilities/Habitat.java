@@ -17,6 +17,14 @@ public class Habitat extends Facility{
         return sys.leakOxygen(this);
     }
 
+    /** Deducts up to {@code amount} oxygen and returns the amount actually lost. */
+    public int applyLeak(int amount) {
+        if (amount < 0) throw new IllegalArgumentException("Leak amount cannot be negative");
+        int lost = Math.min(amount, amountOf("OXYGEN"));
+        if (lost > 0) remove("OXYGEN", lost);
+        return lost;
+    }
+
     @Override
     public String getFacId()
     {

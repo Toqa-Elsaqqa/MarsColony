@@ -5,7 +5,7 @@ public class Resource {
     private int quantity;
 
     public Resource(String type, int quantity) {
-        if (type == null || type.isBlank()) {
+        if (type == null || type.trim().isEmpty()) {
             throw new IllegalArgumentException("Invalid resource type");
         }
 

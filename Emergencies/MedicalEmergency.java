@@ -5,6 +5,7 @@ import Core.Facility;
 import Core.Skill;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 public class MedicalEmergency extends Emergency {
     public static final int MEDICAL_SUPPLIES_COST = 2;
@@ -24,13 +25,15 @@ public class MedicalEmergency extends Emergency {
     }
 
     // One medical officer (HEALING), no robot needed
-    @Override public List<Skill> requiredHumanSkills() { return List.of(Skill.HEALING); }
-    @Override public List<Skill> requiredRobotSkills() { return List.of(); }
+    @Override public List<Skill> requiredHumanSkills() { return Collections.singletonList(Skill.HEALING); }
+    @Override public List<Skill> requiredRobotSkills() { return Collections.emptyList(); }
 
     @Override
     public Map<String, Integer> responseCost() {
-        return Map.of("MEDICAL_SUPPLIES", MEDICAL_SUPPLIES_COST,
-                      "OXYGEN", OXYGEN_COST);
+        Map<String, Integer> cost = new java.util.HashMap<String, Integer>();
+        cost.put("MEDICAL_SUPPLIES", MEDICAL_SUPPLIES_COST);
+        cost.put("OXYGEN", OXYGEN_COST);
+        return cost;
     }
 
     // The relevant facility must be operational
