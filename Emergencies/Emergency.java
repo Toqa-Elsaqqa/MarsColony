@@ -4,6 +4,7 @@ import Core.Location;
 import Core.Skill;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 public abstract class Emergency {
     private EmergencyState state = EmergencyState.ACTIVE;
@@ -30,7 +31,7 @@ public abstract class Emergency {
     // Optional hooks (default: do nothing)
     public String preconditionFailure() { return null; }          // reason, or null if OK
     protected void applyResolutionEffects(ColonyServices colony) { }
-    public List<Emergency> followUps() { return List.of(); }      // emergencies triggered by this one
+    public List<Emergency> followUps() { return Collections.emptyList(); } // emergencies triggered by this one
 
     public final void detect(ColonyServices colony) {
         if (detected)

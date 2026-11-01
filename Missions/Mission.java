@@ -1,14 +1,16 @@
 package Missions;
 
 import Core.Agent;
+import Core.Equipment;
 import Core.Location;
 import Core.Skill;
-import java.lang.reflect.Method;
 import Environment.Environment;
 import Colony.MarsColony;
 import Core.Facility;
 import Personnel.Human;
 import Robots.Robot;
+import Robots.ExplorationRover;
+import Robots.Drone;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,7 @@ public abstract class Mission {
     private final Map<String, Integer> requiredResources;
     private Facility targetFacility;
     private Location targetLocation;
+    private boolean agentsMarkedUnavailable;
 
     protected Mission(String id, String name, int duration, List<Agent> assignedAgents,
                       Map<String, Integer> requiredResources) {
@@ -70,6 +73,7 @@ public abstract class Mission {
     public void markAssigned() {
         if (state != MissionState.ASSIGNED) return;
         for (Agent agent : assignedAgents) agent.setAvailability(false);
+        agentsMarkedUnavailable = true;
     }
 
     public void start() {
@@ -78,14 +82,24 @@ public abstract class Mission {
 
     public void step(MarsColony colony, Environment env) {
         if (state != MissionState.IN_PROGRESS) return;
+        if (env.isCommDisruption() && hasAgent(Drone.class)) {
+            fail("Communication disruption interrupted remote drone mission");
+            return;
+        }
         String hazard = environmentalFailure(env);
         if (hazard != null) { fail(hazard); return; }
         if (agentsDepleted()) { fail("Assigned agent battery depleted"); return; }
         if (equipmentFailed()) { fail("Mission equipment failure"); return; }
         timeElapsed++;
         for (Agent agent : assignedAgents) {
-            changeNumeric(agent, "getBattery", "setBattery", -1);
-            changeNumeric(agent, "getFatigue", "setFatigue", 1);
+            if (agent instanceof Robot) {
+                Robot robot = (Robot) agent;
+                robot.setBattery(Math.max(0, robot.getBattery() - 1));
+            }
+            if (agent instanceof Human) {
+                Human human = (Human) agent;
+                human.setFatigue(Math.min(100, human.getFatigue() + 1));
+            }
         }
         if (timeElapsed >= duration) complete(colony);
     }
@@ -109,13 +123,14 @@ public abstract class Mission {
     }
 
     private void releaseAgents() {
+        if (!agentsMarkedUnavailable) return;
         for (Agent agent : assignedAgents) agent.setAvailability(true);
+        agentsMarkedUnavailable = false;
     }
 
     private boolean agentsDepleted() {
         for (Agent agent : assignedAgents) {
-            Integer battery = number(agent, "getBattery");
-            if (battery != null && battery <= 0) return true;
+            if (agent instanceof Robot && ((Robot) agent).getBattery() <= 0) return true;
         }
         return false;
     }
@@ -157,26 +172,21 @@ public abstract class Mission {
         return false;
     }
 
-    protected static Object invoke(Object target, String method) {
-        if (target == null) return null;
-        try { return target.getClass().getMethod(method).invoke(target); }
-        catch (Exception ignored) { return null; }
+    protected static Integer number(Object target, String getter) {
+        if (target instanceof Robot && "getBattery".equals(getter)) return ((Robot) target).getBattery();
+        if (target instanceof Human && "getFatigue".equals(getter)) return ((Human) target).getFatigue();
+        return null;
     }
 
-    protected static Boolean bool(Object target, String method) {
-        Object value = invoke(target, method);
-        return value instanceof Boolean ? (Boolean) value : null;
+    protected static Boolean bool(Object target, String getter) {
+        if (target instanceof Equipment && "isOperational".equals(getter)) return ((Equipment) target).isOperational();
+        if (target instanceof Facility && "isOperational".equals(getter)) return ((Facility) target).getOperationalStatus();
+        return null;
     }
 
-    protected static Integer number(Object target, String method) {
-        Object value = invoke(target, method);
-        return value instanceof Number ? ((Number) value).intValue() : null;
-    }
-
-    private static void changeNumeric(Object target, String getter, String setter, int delta) {
-        Integer current = number(target, getter);
-        if (current == null) return;
-        try { target.getClass().getMethod(setter, int.class).invoke(target, Math.max(0, current + delta)); }
-        catch (Exception ignored) { }
+    protected static Object invoke(Object target, String getter) {
+        if (target instanceof ExplorationRover && "getEquipment".equals(getter)) return ((ExplorationRover) target).getEquipment();
+        if (target instanceof Facility && "getEquipment".equals(getter)) return ((Facility) target).getEquipment();
+        return null;
     }
 }

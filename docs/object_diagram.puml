@@ -1,0 +1,27 @@
+@startuml object_diagram
+title MARS-OPS - Colony Snapshot
+object "colony:MarsColony" as colony
+object "scientist:Scientist" as scientist {
+  name = "Salma"
+  available = false
+}
+object "rover:ExplorationRover" as rover {
+  name = "Rover-1"
+  battery = 98
+}
+object "habitat:Habitat" as habitat {
+  facId = "HAB-1"
+  operational = true
+}
+object "mission:ExplorationMission" as mission {
+  name = "Explore Valles Region"
+  state = IN_PROGRESS
+  timeElapsed = 2
+}
+colony o-- scientist : crew
+colony o-- rover : robots
+colony o-- habitat : facilities
+colony --> mission : activeMission
+mission --> scientist : assignedAgents
+mission --> rover : assignedAgents
+@enduml
