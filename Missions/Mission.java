@@ -1,23 +1,14 @@
 package Missions;
 
 import Core.Agent;
-<<<<<<< Updated upstream
-=======
 import Core.Equipment;
 import Core.EquipmentType;
->>>>>>> Stashed changes
 import Core.Location;
 import Core.MartianSurface;
 import Core.Skill;
-import java.lang.reflect.Method;
 import Environment.Environment;
 import Colony.MarsColony;
 import Core.Facility;
-<<<<<<< Updated upstream
-import Personnel.Human;
-import Robots.Robot;
-=======
->>>>>>> Stashed changes
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,11 +27,7 @@ public abstract class Mission {
     private final Map<String, Integer> requiredResources;
     private Facility targetFacility;
     private Location targetLocation;
-<<<<<<< Updated upstream
-=======
-    private boolean agentsMarkedUnavailable;
     private final List<Equipment> equipment = new ArrayList<Equipment>();
->>>>>>> Stashed changes
 
     protected Mission(String id, String name, int duration, List<Agent> assignedAgents,
                       Map<String, Integer> requiredResources) {
@@ -110,8 +97,6 @@ public abstract class Mission {
 
     private void step(MarsColony colony, Environment env) {
         if (state != MissionState.IN_PROGRESS) return;
-<<<<<<< Updated upstream
-=======
         if (env.isCommDisruption() && requiresRemoteControl()) {
             fail("Communication disruption interrupted remote drone mission");
             return;
@@ -120,20 +105,12 @@ public abstract class Mission {
             fail("Dust storm interrupted surface rover mission");
             return;
         }
->>>>>>> Stashed changes
         String hazard = environmentalFailure(env);
         if (hazard != null) { fail(hazard); return; }
         if (agentsDepleted()) { fail("Assigned agent battery depleted"); return; }
         if (equipmentFailed()) { fail("Mission equipment failure"); return; }
         timeElapsed++;
-<<<<<<< Updated upstream
-        for (Agent agent : assignedAgents) {
-            changeNumeric(agent, "getBattery", "setBattery", -1);
-            changeNumeric(agent, "getFatigue", "setFatigue", 1);
-        }
-=======
         for (Agent agent : assignedAgents) agent.onMissionTick();
->>>>>>> Stashed changes
         if (timeElapsed >= duration) complete(colony);
     }
 
@@ -160,14 +137,7 @@ public abstract class Mission {
     }
 
     private boolean agentsDepleted() {
-<<<<<<< Updated upstream
-        for (Agent agent : assignedAgents) {
-            Integer battery = number(agent, "getBattery");
-            if (battery != null && battery <= 0) return true;
-        }
-=======
         for (Agent agent : assignedAgents) if (!agent.canContinueMission()) return true;
->>>>>>> Stashed changes
         return false;
     }
 
@@ -199,29 +169,6 @@ public abstract class Mission {
         return false;
     }
 
-<<<<<<< Updated upstream
-    protected static Object invoke(Object target, String method) {
-        if (target == null) return null;
-        try { return target.getClass().getMethod(method).invoke(target); }
-        catch (Exception ignored) { return null; }
-    }
-
-    protected static Boolean bool(Object target, String method) {
-        Object value = invoke(target, method);
-        return value instanceof Boolean ? (Boolean) value : null;
-    }
-
-    protected static Integer number(Object target, String method) {
-        Object value = invoke(target, method);
-        return value instanceof Number ? ((Number) value).intValue() : null;
-    }
-
-    private static void changeNumeric(Object target, String getter, String setter, int delta) {
-        Integer current = number(target, getter);
-        if (current == null) return;
-        try { target.getClass().getMethod(setter, int.class).invoke(target, Math.max(0, current + delta)); }
-        catch (Exception ignored) { }
-=======
     protected boolean hasSurfaceRover() {
         for (Agent agent : assignedAgents) if (agent.isSurfaceRover()) return true;
         return false;
@@ -244,6 +191,5 @@ public abstract class Mission {
         if (targetLocation != null) return targetLocation;
         if (targetFacility != null) return targetFacility;
         return hasSurfaceRover() ? MartianSurface.INSTANCE : null;
->>>>>>> Stashed changes
     }
 }

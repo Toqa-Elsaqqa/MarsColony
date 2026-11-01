@@ -47,10 +47,6 @@ public class MarsColony implements ColonyServices {
     public List<Mission> getMissionHistory() { return Collections.unmodifiableList(missionHistory); }
     public Mission getActiveMission() { return activeMission; }
     public Environment getEnvironment() { return environment; }
-<<<<<<< Updated upstream
-    public void setActiveMission(Mission mission) { activeMission = mission; }
-=======
->>>>>>> Stashed changes
     public void addCrew(Human human) { crew.add(human); }
     public void addRobot(Robot robot) { robots.add(robot); }
     public void addFacility(Facility facility) { facilities.add(facility); }
@@ -134,17 +130,12 @@ public class MarsColony implements ColonyServices {
 
     public boolean submitMission(Mission mission) {
         if (mission == null) throw new IllegalArgumentException("Mission cannot be null");
-<<<<<<< Updated upstream
-=======
         if (mission.getState() != Missions.MissionState.PENDING) return false;
->>>>>>> Stashed changes
         if (activeMission != null) {
             mission.fail("Another mission is currently active");
             missionHistory.add(mission);
             return false;
         }
-<<<<<<< Updated upstream
-=======
         for (Agent agent : mission.getAssignedAgents()) {
             if (agent == null || !allAgents().contains(agent) || !agent.getAvailability()) {
                 mission.fail("Assigned agent is not available in this colony");
@@ -161,7 +152,6 @@ public class MarsColony implements ColonyServices {
                 }
             }
         }
->>>>>>> Stashed changes
         if (!mission.validateRequirements(this, environment)) {
             mission.fail(mission.getFailureReason());
             missionHistory.add(mission);

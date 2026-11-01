@@ -21,8 +21,6 @@ public class Habitat extends Facility{
         consumeOxygenForOneTimeUnit();
     }
 
-<<<<<<< Updated upstream
-=======
     /** Deducts up to {@code amount} oxygen and returns the amount actually lost. */
     public int applyLeak(int amount) {
         if (amount < 0) throw new IllegalArgumentException("Leak amount cannot be negative");
@@ -31,8 +29,6 @@ public class Habitat extends Facility{
         if (amountOf("OXYGEN") == 0) setOperationalStatus(false);
         return lost;
     }
-
->>>>>>> Stashed changes
     @Override
     public String getFacId()
     {
