@@ -61,11 +61,12 @@ package Colony {
 }
 package Missions {
   abstract class Mission {
-    +validateRequirements(MarsColony, Environment) boolean
-    +markAssigned(MarsColony) void
-    +advanceOneTimeUnit(MarsColony, Environment) void
+    +validateRequirements(MissionColony, Environment) boolean
+    +markAssigned(MissionColony) void
+    +advanceOneTimeUnit(MissionColony, Environment) void
     +fail(String) void
   }
+  interface MissionColony
   class ExplorationMission
   class RepairMission
   class ResearchMission
@@ -132,6 +133,9 @@ Location <|.. Facility
 Location <|.. MartianSurface
 
 MarsColony ..|> ColonyServices
+MarsColony ..|> MissionColony
+MissionColony --> Mission
+MissionColony --> Facility
 MarsColony o-- "0..*" Human : crew
 MarsColony o-- "0..*" Robot : robots
 MarsColony o-- "0..*" Facility : facilities

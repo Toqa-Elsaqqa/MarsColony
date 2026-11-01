@@ -8,6 +8,7 @@ import Emergencies.ColonyServices;
 import Environment.Environment;
 import Facilities.StorageFacility;
 import Missions.Mission;
+import Missions.MissionColony;
 import Robots.Robot;
 import Personnel.Human;
 
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class MarsColony implements ColonyServices {
+public class MarsColony implements ColonyServices, MissionColony {
     private final List<Human> crew = new ArrayList<Human>();
     private final List<Robot> robots = new ArrayList<Robot>();
     private final List<Facility> facilities = new ArrayList<Facility>();
@@ -156,13 +157,6 @@ public class MarsColony implements ColonyServices {
             mission.fail(mission.getFailureReason());
             missionHistory.add(mission);
             return false;
-        }
-        for (Agent agent : mission.getAssignedAgents()) {
-            if (!agent.getAvailability() || !mission.agentsCapable()) {
-                mission.fail("Agent lacks capability or is unavailable");
-                missionHistory.add(mission);
-                return false;
-            }
         }
         if (!consume(mission.getRequiredResources())) {
             mission.fail("Insufficient colony-wide operational resources");

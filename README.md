@@ -39,12 +39,19 @@ Missions validate their required skills, equipment, facilities and resources bef
 
 ## Emergency rules
 
-`EmergencyHandler` detects an event, checks preconditions, selects distinct available responders by skill, and verifies response resources before dispatch. If responders or resources are unavailable, the event becomes `UNRESOLVED` and response resources are not consumed. Successful responders are moved to the incident location and released after resolution. An oxygen leak deducts up to 50 oxygen on detection and deducts the same amount again if unresolved; unresolved or depleted habitats become non-operational, while a repaired leak restores operational status. Fire consumes up to 20 oxygen, using local lab oxygen first and colony-wide operational stores for any remainder.
+`EmergencyHandler` detects an event, checks preconditions, selects distinct available responders by skill, and verifies response resources before dispatch. If responders or resources are unavailable, the event becomes `UNRESOLVED` and response resources are not consumed. Successful responders are moved to the incident location and released after resolution. All response costs below are deducted from operational colony resources only after suitable responders are found.
+
+| Emergency | Required responders | Response resource cost | Other effects |
+|---|---|---|---|
+| Oxygen Leak | One human with `REPAIR` and one robot with `REPAIR` | 2 `SPARE_PARTS`, 5 `BATTERY_POWER` | Up to 50 `OXYGEN` is lost on detection and another 50 if unresolved; an unresolved leak makes the habitat non-operational, while successful repair restores it. |
+| Fire | One human with `FIGHTFIRE`; no robot responder | 10 `WATER` | Burns up to 20 `OXYGEN` (lab stores first, then colony stores), makes the lab non-operational, and injures each human present by 30 health. An unresolved fire damages the lab's equipment. Each injured person triggers a Medical Emergency follow-up. |
+| Rover Breakdown | One human with `REPAIR` and one robot with `REPAIR` | 2 `SPARE_PARTS`, 5 `BATTERY_POWER` | The rover's health drops to 20 and its active mission fails. Successful repair restores rover health to 100; otherwise it remains damaged. |
+| Medical Emergency | One human with `HEALING`; no robot responder | 2 `MEDICAL_SUPPLIES`, 5 `OXYGEN` | Successful treatment restores up to 40 health (capped at 100); unresolved treatment costs 10 health. The treatment facility must be operational. |
 
 ## Environmental effects on missions
 
 - `DUST_STORM` prevents exploration missions from starting and fails active missions using a surface rover on their next simulation step.
-- `COMMUNICATION_DISRUPTION` blocks remote drone missions and rescue coordination, and fails active communication-dependent missions.
+- `COMMUNICATION_DISRUPTION` blocks missions that require remote drone control at submission and fails those active remote-control missions on their next step. Rescue coordination is also rejected during a disruption. Other active mission types continue unless another requirement or failure guard applies.
 - Other mission types continue under these conditions unless their own requirements fail.
 
 ## Build and run
@@ -70,4 +77,4 @@ Run one required scenario with `java -cp out Main 1` through `java -cp out Main 
 
 ## UML documentation
 
-`docs/` contains editable PlantUML `.puml` and Mermaid `.md` sources for the merged class diagram, object snapshot, mission state machine, sequence diagrams A (mission execution), B (oxygen leak), C (dust storm), and the use case diagram. The class diagram shows inheritance, association, aggregation and `Habitat` composition of `LifeSupportSystem`. The use case diagram covers colony-operator and emergency-operator use cases with `<<include>>` and `<<extend>>` relations.
+`docs/` contains editable PlantUML `.puml` and Mermaid `.md` sources and exported PNG diagrams for the merged class diagram, object snapshot, mission state machine, sequence diagrams A (mission execution), B (oxygen leak), C (dust storm), and the use case diagram. The class diagram shows inheritance, association, aggregation and `Habitat` composition of `LifeSupportSystem`. The use case diagram covers colony-operator and emergency-operator use cases with valid `<<include>>` and `<<extend>>` relations.

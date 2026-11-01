@@ -12,8 +12,7 @@ Environment --> ExplorationMission : true (DUST_STORM)
 ExplorationMission -> ExplorationMission : set failureReason
 ExplorationMission --> MarsColony : false
 MarsColony -> ExplorationMission : fail(failureReason)
-note right of ExplorationMission : State becomes FAILED immediately.
-No agent is locked and the mission never becomes active.
+note right of ExplorationMission : State becomes FAILED immediately.\nNo agent is locked and the mission never becomes active.
 MarsColony --> Operator : submission rejected
 note over ExplorationMission : During active work, the next tick fails missions using a surface rover, including rover-based rescue.
 @enduml

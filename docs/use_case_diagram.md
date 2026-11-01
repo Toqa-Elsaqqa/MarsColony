@@ -26,9 +26,8 @@ flowchart LR
     EmergencyOperator --- UC8
     EmergencyOperator --- UC9
     UC4 -. "<<include>>" .-> UC3
-    UC5 -. "<<include>>" .-> UC6
     UC9 -. "<<extend>>: mission outcome recorded" .-> UC5
     UC9 -. "<<extend>>: emergency outcome recorded" .-> UC8
 ```
 
-The report includes colony resource totals. Mission execution progresses as simulation time advances. Outcome inspection is an optional follow-up to mission or emergency handling; the Java status report exposes the corresponding histories.
+The report includes colony resource totals. Mission execution progresses as simulation time advances, but submitting a mission does not itself include a separate time-advancement use case. Outcome inspection is an optional follow-up to mission or emergency handling; the Java status report exposes the corresponding histories.

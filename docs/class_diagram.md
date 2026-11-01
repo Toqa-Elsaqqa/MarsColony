@@ -31,10 +31,16 @@ classDiagram
       +submitMission(Mission) boolean
       +getActiveMission() Mission
     }
+    class MissionColony {
+      <<interface>>
+      +getActiveMission() Mission
+      +isAcceptingMission(Mission) boolean
+      +getFacilities() List~Facility~
+    }
     class Mission {
-      +validateRequirements(MarsColony, Environment) boolean
-      +markAssigned(MarsColony) void
-      +advanceOneTimeUnit(MarsColony, Environment) void
+      +validateRequirements(MissionColony, Environment) boolean
+      +markAssigned(MissionColony) void
+      +advanceOneTimeUnit(MissionColony, Environment) void
       +fail(String) void
     }
     class Environment {
@@ -102,6 +108,9 @@ classDiagram
     Emergency <|-- MedicalEmergency
     Location <|.. Facility
     MarsColony ..|> ColonyServices
+    MarsColony ..|> MissionColony
+    MissionColony --> Mission
+    MissionColony --> Facility
 
     MarsColony o-- Human : crew
     MarsColony o-- Robot : robots

@@ -6,44 +6,54 @@ participant Agent
 participant Simulation
 
 Operator -> MarsColony : submitMission(mission)
-MarsColony -> MarsColony : check active mission
-alt Another mission is active
-    MarsColony -> Mission : fail("Another mission is currently active")
-    Mission -> Agent : release assigned agents
-else No active mission
-    MarsColony -> Mission : validateRequirements(colony, environment)
-    alt Requirements invalid
-        MarsColony -> Mission : fail(failureReason)
+MarsColony -> MarsColony : check pending state and active mission
+alt Mission is not pending
+    MarsColony --> Operator : submission rejected without changing mission
+else Mission is pending
+    alt Another mission is active
+        MarsColony -> Mission : fail("Another mission is currently active")
         Mission -> Agent : release assigned agents
-    else Requirements valid
-        MarsColony -> Agent : check availability and capability
-        alt Agent unavailable or incapable
-            MarsColony -> Mission : fail("Agent lacks capability or is unavailable")
+    else Colony is idle
+    MarsColony -> Agent : check colony membership and availability
+    alt Assigned agent unavailable or not in colony
+        MarsColony -> Mission : fail("Assigned agent is not available in this colony")
+        Mission -> Agent : release assigned agents
+    else Assigned agents available
+        MarsColony -> MarsColony : check communication disruption for remote control
+        alt Remote control blocked
+            MarsColony -> Mission : fail("Communication disruption prevents remote drone operations")
             Mission -> Agent : release assigned agents
-        else Agents accepted
-            MarsColony -> MarsColony : check and consume colony resources
-            alt Resources insufficient
-                MarsColony -> Mission : fail("Insufficient colony-wide operational resources")
+        else Communication permits mission
+            MarsColony -> Mission : validateRequirements(colony, environment)
+            alt Requirements invalid
+                MarsColony -> Mission : fail(failureReason)
                 Mission -> Agent : release assigned agents
-            else Resources available
-                MarsColony -> Mission : markAssigned(colony)
-                MarsColony -> MarsColony : set active mission
-                Operator -> Simulation : advanceTime(units)
-                loop each time unit
-                    Simulation -> MarsColony : advance each facility one time unit
-                    Simulation -> Mission : advanceOneTimeUnit(colony, environment)
-                    Mission -> Agent : setLocation(target) on first tick
-                    Mission -> Agent : onMissionTick()
-                    alt Duration reached
-                        Mission -> Mission : complete(colony)
-                        Mission -> Agent : release assigned agents
-                    else Mid-mission failure guard triggered
-                        Mission -> Mission : fail(reason)
-                        Mission -> Agent : release assigned agents
+            else Requirements valid
+                MarsColony -> MarsColony : check and consume colony resources
+                alt Resources insufficient
+                    MarsColony -> Mission : fail("Insufficient colony-wide operational resources")
+                    Mission -> Agent : release assigned agents
+                else Resources available
+                    MarsColony -> Mission : markAssigned(colony)
+                    MarsColony -> MarsColony : set active mission
+                    Operator -> Simulation : advanceTime(units)
+                    loop each time unit
+                        Simulation -> MarsColony : advance each facility one time unit
+                        Simulation -> Mission : advanceOneTimeUnit(colony, environment)
+                        Mission -> Agent : setLocation(target) on first tick
+                        Mission -> Agent : onMissionTick()
+                        alt Duration reached
+                            Mission -> Mission : complete(colony)
+                            Mission -> Agent : release assigned agents
+                        else Mid-mission failure guard triggered
+                            Mission -> Mission : fail(reason)
+                            Mission -> Agent : release assigned agents
+                        end
                     end
                 end
             end
         end
+    end
     end
 end
 @enduml

@@ -30,7 +30,6 @@ EO --> UC8
 EO --> UC9
 
 UC4 ..> UC3 : <<include>>
-UC5 ..> UC6 : <<include>>
 UC9 ..> UC5 : <<extend>>\n[mission outcome recorded]
 UC9 ..> UC8 : <<extend>>\n[emergency outcome recorded]
 @enduml

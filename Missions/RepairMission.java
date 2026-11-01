@@ -4,7 +4,6 @@ import Core.Agent;
 import Core.Facility;
 import Core.Equipment;
 import Environment.Environment;
-import Colony.MarsColony;
 import Core.Skill;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class RepairMission extends Mission {
     public void setTargetEquipment(Equipment targetEquipment) { this.targetEquipment = targetEquipment; }
     public Equipment getTargetEquipment() { return targetEquipment; }
 
-    @Override public boolean validateRequirements(MarsColony colony, Environment env) {
+    @Override public boolean validateRequirements(MissionColony colony, Environment env) {
         if (getTargetFacility() == null && targetEquipment == null) return reject("Repair target required");
         if (!hasHumanWithSkill(Skill.REPAIR)) return reject("Engineer with repair skill required");
         if (!hasRobotWithSkill(Skill.REPAIR))
@@ -34,7 +33,7 @@ public class RepairMission extends Mission {
         return true;
     }
 
-    @Override protected void applyCompletion(MarsColony colony) {
+    @Override protected void applyCompletion(MissionColony colony) {
         if (targetEquipment != null) targetEquipment.repair();
         if (getTargetFacility() != null) {
             getTargetFacility().repairEquipment();

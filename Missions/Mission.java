@@ -7,7 +7,6 @@ import Core.Location;
 import Core.MartianSurface;
 import Core.Skill;
 import Environment.Environment;
-import Colony.MarsColony;
 import Core.Facility;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public abstract class Mission {
         this(id, name, duration, null, null);
     }
 
-    public abstract boolean validateRequirements(MarsColony colony, Environment env);
+    public abstract boolean validateRequirements(MissionColony colony, Environment env);
 
     public String getId() { return id; }
     public String getName() { return name; }
@@ -69,11 +68,7 @@ public abstract class Mission {
     public List<Equipment> getEquipment() { return Collections.unmodifiableList(equipment); }
     protected void setFailureReason(String reason) { this.failureReason = reason; }
 
-    public boolean agentsCapable() {
-        return true;
-    }
-
-    public final void markAssigned(Colony.MarsColony colony) {
+    public final void markAssigned(MissionColony colony) {
         if (colony == null || colony.getActiveMission() != null || !colony.isAcceptingMission(this))
             throw new IllegalStateException("Mission acceptance requires an idle colony");
         if (state != MissionState.PENDING) throw new IllegalStateException("Mission is not pending");
@@ -90,12 +85,12 @@ public abstract class Mission {
     }
 
     /** Advances the mission through its controlled simulation entry point. */
-    public final void advanceOneTimeUnit(MarsColony colony, Environment env) {
+    public final void advanceOneTimeUnit(MissionColony colony, Environment env) {
         if (state == MissionState.ASSIGNED) start();
         step(colony, env);
     }
 
-    private void step(MarsColony colony, Environment env) {
+    private void step(MissionColony colony, Environment env) {
         if (state != MissionState.IN_PROGRESS) return;
         if (env.isCommDisruption() && requiresRemoteControl()) {
             fail("Communication disruption interrupted remote drone mission");
@@ -116,9 +111,9 @@ public abstract class Mission {
 
     protected String environmentalFailure(Environment env) { return null; }
     protected boolean hasEquipmentFailure() { return false; }
-    protected void applyCompletion(MarsColony colony) { }
+    protected void applyCompletion(MissionColony colony) { }
 
-    private void complete(MarsColony colony) {
+    private void complete(MissionColony colony) {
         if (state != MissionState.IN_PROGRESS) return;
         applyCompletion(colony);
         state = MissionState.COMPLETED;

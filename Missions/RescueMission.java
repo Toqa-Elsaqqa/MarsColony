@@ -3,7 +3,6 @@ package Missions;
 import Core.Agent;
 import Core.Facility;
 import Environment.Environment;
-import Colony.MarsColony;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ public class RescueMission extends Mission {
     public void setStrandedAgent(Agent strandedAgent) { this.strandedAgent = strandedAgent; }
     public Agent getStrandedAgent() { return strandedAgent; }
 
-    @Override public boolean validateRequirements(MarsColony colony, Environment env) {
+    @Override public boolean validateRequirements(MissionColony colony, Environment env) {
         if (env.isCommDisruption()) return reject("Communication disruption prevents rescue coordination");
         boolean station = false;
         for (Facility facility : colony.getFacilities())
@@ -36,7 +35,7 @@ public class RescueMission extends Mission {
         return true;
     }
 
-    @Override protected void applyCompletion(MarsColony colony) {
+    @Override protected void applyCompletion(MissionColony colony) {
         if (strandedAgent != null) strandedAgent.setAvailability(true);
     }
 

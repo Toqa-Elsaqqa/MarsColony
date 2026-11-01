@@ -3,7 +3,6 @@ package Missions;
 import Core.Agent;
 import Environment.Environment;
 import Environment.WeatherCondition;
-import Colony.MarsColony;
 import Core.EquipmentType;
 import Core.Skill;
 import java.util.List;
@@ -18,7 +17,7 @@ public class ExplorationMission extends Mission {
         super(id, name, duration, agents);
     }
 
-    @Override public boolean validateRequirements(MarsColony colony, Environment env) {
+    @Override public boolean validateRequirements(MissionColony colony, Environment env) {
         if (env.isDustStorm()) return reject("Dust storm prevents exploration");
         if (!hasSurfaceRover() || !hasAgentWithSkill(Skill.EXPLORATION))
             return reject("Exploration rover with exploration skill required");
